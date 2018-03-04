@@ -1,5 +1,5 @@
-from keras.models import Model
-from keras.layers import Conv2D
+from keras.models import Model, Sequential
+from keras.layers import Conv2D, Input
 import keras.backend as K
 from vgg import VGG19, preprocess_input
 from decoder import decoder_layers
@@ -13,10 +13,16 @@ class EncoderDecoder:
     def __init__(self, input_shape=(256, 256, 3), target_layer=5):
         self.input_shape = input_shape
         self.target_layer = target_layer
+
         self.encoder = VGG19(input_shape=input_shape, target_layer=target_layer)
+        self.decoder = self.create_decoder(target_layer)
+
+        self.model = Sequential()
+        self.model.add(self.encoder)
+        self.model.add(self.decoder)
+
         self.loss = self.create_loss_fn(self.encoder)
-        self.decoder_layers = self.create_decoder(target_layer)
-        self.model = Model(self.encoder.inputs, self.decoder_layers)
+
         self.model.compile('adam', self.loss)
 
     def create_loss_fn(self, encoder):
@@ -32,13 +38,15 @@ class EncoderDecoder:
         return loss
 
     def create_decoder(self, target_layer):
-        layers = decoder_layers(self.encoder.output, target_layer)
-        return Conv2D(3, (3, 3), activation='relu', padding='same',
-                name='decoder_out')(layers)
+        inputs = Input(shape=self.encoder.output_shape[1:])
+        layers = decoder_layers(inputs, target_layer)
+        output = Conv2D(3, (3, 3), activation='relu', padding='same',
+                        name='decoder_out')(layers)
+        return Model(inputs, output, name='decoder_%s' % target_layer)
 
     def export_decoder(self):
-        pass
+        self.decoder.save('decoder_%s.h5' % self.target_layer)
 
 
-#ed = EncoderDecoder()
-#ed.model.summary()
+ed = EncoderDecoder()
+ed.model.summary()
