@@ -46,7 +46,3 @@ class EncoderDecoder:
 
     def export_decoder(self):
         self.decoder.save('decoder_%s.h5' % self.target_layer)
-
-
-ed = EncoderDecoder()
-ed.model.summary()
