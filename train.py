@@ -1,3 +1,5 @@
+from keras.preprocessing.image import ImageDataGenerator
+
 from model import EncoderDecoder
 from util import count_num_samples
 
