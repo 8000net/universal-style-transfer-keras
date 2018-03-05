@@ -1,4 +1,4 @@
-from keras.models import Model, Sequential
+from keras.models import Model, Sequential, load_model
 from keras.layers import Conv2D, Input
 import keras.backend as K
 from vgg import VGG19, preprocess_input
@@ -10,12 +10,16 @@ def l2_loss(x):
     return K.sum(K.square(x)) / 2
 
 class EncoderDecoder:
-    def __init__(self, input_shape=(256, 256, 3), target_layer=5):
+    def __init__(self, input_shape=(256, 256, 3), target_layer=5,
+                 decoder_path=None):
         self.input_shape = input_shape
         self.target_layer = target_layer
 
         self.encoder = VGG19(input_shape=input_shape, target_layer=target_layer)
-        self.decoder = self.create_decoder(target_layer)
+        if decoder_path:
+            self.decoder = load_model(decoder_path)
+        else:
+            self.decoder = self.create_decoder(target_layer)
 
         self.model = Sequential()
         self.model.add(self.encoder)
