@@ -10,11 +10,10 @@ WEIGHTS_PATH_NO_TOP = 'https://github.com/fchollet/deep-learning-models/releases
 
 MEAN_PIXEL = np.array([103.939, 116.779, 123.68])
 
-weights_path = get_file('vgg19_weights_tf_dim_ordering_tf_kernels_notop.h5',
+WEIGHTS_PATH = get_file('vgg19_weights_tf_dim_ordering_tf_kernels_notop.h5',
                         WEIGHTS_PATH_NO_TOP,
                         cache_subdir='models',
                         file_hash='253f8cb515780f3b799900260a226db6')
-WEIGHTS_FILE = h5py.File(weights_path)
 
 def vgg_layers(inputs, target_layer):
     # Block 1
@@ -55,7 +54,7 @@ def vgg_layers(inputs, target_layer):
 
 
 def load_weights(model):
-    f = WEIGHTS_FILE
+    f = h5py.File(WEIGHTS_PATH)
     layer_names = [name for name in f.attrs['layer_names']]
 
     for layer in model.layers:
@@ -65,6 +64,8 @@ def load_weights(model):
             weights = [g[name] for name in g.attrs['weight_names']]
             layer.set_weights(weights)
             layer.trainable = False
+
+    f.close()
 
 
 def VGG19(input_tensor=None, input_shape=None, target_layer=1):
