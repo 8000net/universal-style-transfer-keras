@@ -4,7 +4,7 @@ import keras.backend as K
 from vgg import VGG19, preprocess_input
 from decoder import decoder_layers
 
-LAMBDA=0.01
+LAMBDA=1
 
 def l2_loss(x):
     return K.sum(K.square(x)) / 2
